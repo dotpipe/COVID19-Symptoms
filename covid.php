@@ -56,10 +56,13 @@
         public $image_height = 650;
         public $between = 50;
 
-        public function start_image (string $img, array $arrays, array $totals)
+        public function start_image (string $img, array $totals)
         {
+            
+            $this->arr = array("fever" => 0.04, "fatigue" => 0.06, "cough" => 0.05, "appetite" => 0.09, "body_aches" => 0.11,
+                "breath" => 0.09, "mucus" => 0.03, "throat" => 0.07, "headache" => 0.1, "chills" => 0.08, "smell" => 0.1, "nose" => 0.02, "nausea" => 0.14, "diarrhea" => 0.15,
+                "asphixiation" => 0.25, "chest_pressure" => 0.25, "bluish_lips" => 0.40, "confusion" => 0.11);
             $this->total = $totals;
-            $this->arr = $arrays;
             $x = 0;
             $keys = [];
             foreach ($this->arr as $key => $values) {
@@ -95,7 +98,9 @@
         public function draw_candlestick (string $symptom, float $symptom_pct, float $total) {
             if ($total == 0)
                 return $this;
-            imageflip($this->image_candle, IMG_FLIP_VERTICAL);
+            if ($this->image_candle == null)
+                $this->image_candle = imagecreatetruecolor(25, $this->image_scale);
+            
             $this->set_symptom_color($symptom);
             imagefilledrectangle($this->image_candle, 0, ($this->symptom_total_pct)*100, 25, ($this->symptom_total_pct + ($symptom_pct* $total))*100, $this->color);
             $this->symptom_total_pct += $symptom_pct;
@@ -104,8 +109,17 @@
 
         public function merge_candlestick (int $day_cnt, int $cases)
         {
-            imagecopymerge($this->image, $this->image_candle, $day_cnt*50, $cases * ($this->between/$this->image_height), 0, 0, 25, $this->image_scale, 100);
+
+            imageflip($this->image_candle, IMG_FLIP_VERTICAL);
+            imagecopymerge($this->image, $this->image_candle, $day_cnt*50, $cases * ($this->between/$this->image_height), 0, 0, 25, $this->image_scale , 100);
             $this->symptom_total_pct = 0;
+            return $this;
+        }
+
+        public function destroy_candle()
+        {
+            imagedestroy($this->image_candle);
+            $this->image_candle = null;
             return $this;
         }
 
@@ -138,7 +152,16 @@
     
     $total_symptoms = array(1, 2, 1, 2,1,2,1,1,1,1,1,2,1,2,2,1,1,2);
     $img_mrk = new ImageMaker();
-    $img_mrk->start_image("null.webp", $symptoms, $total_symptoms)->draw_dashed_pct(50, 50);
+    $img_mrk->start_image("null.webp", $total_symptoms)->draw_dashed_pct(50, 50);
+    $y = 0;
+    foreach ($symptoms as $symptom => $percent)
+    {
+        $img_mrk->draw_candlestick($symptom, $percent, $total_symptoms[$y]);
+        $y++;
+    }
+    $img_mrk->merge_candlestick(1, 500);
+    $img_mrk->destroy_candle();
+    $total_symptoms = array(1, 0, 1, 0,1,0,0,1,1,1,1,2,1,2,0,1,1,2);
     $y = 0;
     foreach ($symptoms as $symptom => $percent)
     {
@@ -146,9 +169,7 @@
         $y++;
     }
 
-    $img_mrk->merge_candlestick(1, 500);
-    $img_mrk->merge_candlestick(2, 75);
-    $img_mrk->merge_candlestick(3, 75);
+    $img_mrk->merge_candlestick(2, 500);
     $img_mrk->export();
 
     echo "<img src='null.webp'>";

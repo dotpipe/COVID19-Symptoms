@@ -55,12 +55,17 @@ class ImageMaker {
     public $image_height = 650;
     public $between = 50;
 
+    // Default values for symptoms array.
+    public $defaults = [];
+
+    // Populated internally by symptoms array.
+    public $arr = [];
+
     public function start_image (string $img, array $totals)
     {
+        // Fetch from defaults.
+        $this->arr = $this->defaults;
 
-        $this->arr = array("fever" => 0.04, "fatigue" => 0.06, "cough" => 0.05, "appetite" => 0.09, "body_aches" => 0.11,
-            "breath" => 0.09, "mucus" => 0.03, "throat" => 0.07, "headache" => 0.1, "chills" => 0.08, "smell" => 0.1, "nose" => 0.02, "nausea" => 0.14, "diarrhea" => 0.15,
-            "asphixiation" => 0.25, "chest_pressure" => 0.25, "bluish_lips" => 0.40, "confusion" => 0.11);
         $this->total = $totals;
         $x = 0;
         $keys = [];
@@ -144,13 +149,33 @@ class ImageMaker {
         return $this;
     }
 }
-$x = 0;
-$symptoms = array("fever" => 0.04, "fatigue" => 0.06, "cough" => 0.05, "appetite" => 0.09, "body_aches" => 0.11,
-        "breath" => 0.09, "mucus" => 0.03, "throat" => 0.07, "headache" => 0.1, "chills" => 0.08, "smell" => 0.1, "nose" => 0.02, "nausea" => 0.14, "diarrhea" => 0.15,
-        "asphixiation" => 0.25, "chest_pressure" => 0.25, "bluish_lips" => 0.40, "confusion" => 0.11);
 
-$total_symptoms = array(1, 2, 1, 2,1,2,1,1,1,1,1,2,1,2,2,1,1,2);
+$x = 0;
+$symptoms = [
+    'fever' => 0.04,
+    'fatigue' => 0.06,
+    'cough' => 0.05,
+    'appetite' => 0.09,
+    'body_aches' => 0.11,
+    'breath' => 0.09,
+    'mucus' => 0.03,
+    'throat' => 0.07,
+    'headache' => 0.1,
+    'chills' => 0.08,
+    'smell' => 0.1,
+    'nose' => 0.02,
+    'nausea' => 0.14,
+    'diarrhea' => 0.15,
+    'asphixiation' => 0.25,
+    'chest_pressure' => 0.25,
+    'bluish_lips' => 0.40,
+    'confusion' => 0.11
+];
+
+$total_symptoms = [1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 1, 2];
 $img_mrk = new ImageMaker();
+$img_mrk->defaults = $symptoms;
+
 $img_mrk->start_image("null.webp", $total_symptoms)->draw_dashed_pct(50, 50);
 $y = 0;
 foreach ($symptoms as $symptom => $percent)
@@ -160,7 +185,7 @@ foreach ($symptoms as $symptom => $percent)
 }
 $img_mrk->merge_candlestick(1, 500);
 $img_mrk->destroy_candle();
-$total_symptoms = array(1, 0, 1, 0,1,0,0,1,1,1,1,2,1,2,0,1,1,2);
+$total_symptoms = [1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 2, 1, 2, 0, 1, 1, 2];
 $y = 0;
 foreach ($symptoms as $symptom => $percent)
 {

@@ -172,4 +172,3 @@ $img_mrk->merge_candlestick(2, 500);
 $img_mrk->export();
 
 echo "<img src='null.webp'>";
-?>
